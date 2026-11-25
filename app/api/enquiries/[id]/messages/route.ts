@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/mysql';
 import { randomUUID } from 'crypto';
+import { ensureUserExists } from '@/lib/db/user-helper';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,12 +37,28 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const { content, sender_type = 'user' } = await req.json();
+    const { content, sender_type = 'user', userId } = await req.json();
 
     if (!content || !content.trim()) {
       return NextResponse.json(
         { error: 'Message content is required' },
         { status: 400 }
+      );
+    }
+
+    // Ensure parent enquiries row exists to satisfy fk_enquiry_messages_enquiry
+    const existingEnquiry = await query<any[]>(
+      'SELECT id, user_id FROM enquiries WHERE id = ? LIMIT 1;',
+      [id]
+    );
+
+    if (!existingEnquiry || existingEnquiry.length === 0) {
+      const targetUserId = await ensureUserExists(userId);
+      await query(
+        `INSERT INTO enquiries (id, user_id, subject, status, created_at, updated_at)
+         VALUES (?, ?, 'Chat with AI Assistant', 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+         ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;`,
+        [id, targetUserId]
       );
     }
 

@@ -5,8 +5,8 @@ import { DashboardContent } from '@/components/admin/dashboard/dashboard-content
 
 export default function AdminDashboardPage() {
   return (
-    <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
+    <div className='space-y-6' suppressHydrationWarning>
+      <div className='flex items-center justify-between' suppressHydrationWarning>
         <h2 className='text-2xl font-bold'>Dashboard Overview</h2>
       </div>
 

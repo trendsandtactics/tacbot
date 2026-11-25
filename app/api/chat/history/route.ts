@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/mysql';
 import { randomUUID } from 'crypto';
+import { ensureUserExists } from '@/lib/db/user-helper';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,9 +61,8 @@ export async function POST(req: NextRequest) {
   try {
     const { userId } = await req.json();
 
-    if (!userId) {
-      return NextResponse.json({ error: 'userId is required' }, { status: 400 });
-    }
+    // Ensure valid user exists to satisfy foreign key fk_chat_histories_user
+    const validUserId = await ensureUserExists(userId);
 
     const id = randomUUID();
     await query(
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
       INSERT INTO chat_histories (id, user_id, title, current_flow, created_at, updated_at)
       VALUES (?, ?, 'New Chat', 'start', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
       `,
-      [id, userId]
+      [id, validUserId]
     );
 
     const created = await query<any[]>(

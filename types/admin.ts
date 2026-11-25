@@ -40,6 +40,8 @@ export interface Conversation {
   id: string;
   users: {
     name: string;
+    mobile?: string;
+    student_grade?: string;
   };
   lastMessage?: string;
   updated_at: string;
@@ -54,6 +56,19 @@ export interface Message {
   created_at: string;
 }
 
+export interface AdminContact {
+  id: string;
+  name: string;
+  mobile: string;
+  student_grade?: string | null;
+  role: 'user' | 'admin';
+  created_at: string;
+  updated_at: string;
+  total_chats?: number;
+  total_enquiries?: number;
+  last_active?: string;
+}
+
 export interface AdminEnquiry {
   id: string;
   subject: string;
@@ -63,6 +78,7 @@ export interface AdminEnquiry {
   users: {
     name: string;
     mobile: string;
+    student_grade?: string;
   };
   messages: EnquiryMessage[];
 }

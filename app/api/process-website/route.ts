@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { processWebsiteContent } from '@/lib/utils/document-processor';
+import { GeminiService } from '@/lib/services/gemini-service';
 
 export async function POST(req: Request) {
   try {
@@ -13,6 +14,7 @@ export async function POST(req: Request) {
     }
 
     await processWebsiteContent(url);
+    GeminiService.clearCache();
 
     return NextResponse.json({ message: 'Website processed successfully' });
   } catch (error) {

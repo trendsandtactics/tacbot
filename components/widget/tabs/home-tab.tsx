@@ -1,12 +1,13 @@
 'use client';
 
 import Image from 'next/image';
-import { Bot, ChevronDown, Facebook, Instagram, Linkedin, Loader2, Phone, User, X } from 'lucide-react';
+import { Bot, ChevronDown, Facebook, Instagram, Linkedin, Loader2, Phone, User, X, GraduationCap } from 'lucide-react';
 import * as Accordion from '@radix-ui/react-accordion';
 import { useState, useEffect } from 'react';
 import { AnnouncementService } from '@/lib/services/announcement-service';
 import { ChatService } from '@/lib/services/chat-service';
 import type { Announcement } from '@/types/announcement';
+import { STUDENT_GRADES } from '@/types/student';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
@@ -63,7 +64,7 @@ export function HomeTab({ onChatClick, onClose }: HomeTabProps) {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const [formData, setFormData] = useState({ name: '', mobile: '' });
+  const [formData, setFormData] = useState({ name: '', mobile: '', student_grade: '' });
   const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
@@ -83,37 +84,27 @@ export function HomeTab({ onChatClick, onClose }: HomeTabProps) {
   }, []);
 
   const handleChatClick = () => {
-    // Check if user is already registered in localStorage
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('user-details');
-      if (stored) {
-        try {
-          const user = JSON.parse(stored);
-          if (user?.id && user?.name && user?.mobile) {
-            onChatClick();
-            return;
-          }
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
-    // If not registered, open the registration modal
-    setShowRegisterModal(true);
+    // Navigate directly into message tab where contact details form is rendered within the widget popup
+    onChatClick();
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || formData.mobile.length !== 10 || isRegistering) return;
+    if (!formData.name.trim() || formData.mobile.length !== 10 || !formData.student_grade || isRegistering) return;
 
     setIsRegistering(true);
     try {
-      const user = await ChatService.createUser(formData.name.trim(), formData.mobile.trim());
+      const user = await ChatService.createUser(
+        formData.name.trim(),
+        formData.mobile.trim(),
+        formData.student_grade
+      );
       if (user) {
         const userObj = {
           id: user.id,
           name: user.name,
-          mobile: user.mobile
+          mobile: user.mobile,
+          student_grade: user.student_grade || formData.student_grade
         };
         localStorage.setItem('user-details', JSON.stringify(userObj));
         window.dispatchEvent(
@@ -128,7 +119,7 @@ export function HomeTab({ onChatClick, onClose }: HomeTabProps) {
         );
         toast.success(`Welcome, ${user.name}!`);
         setShowRegisterModal(false);
-        setFormData({ name: '', mobile: '' });
+        setFormData({ name: '', mobile: '', student_grade: '' });
         onChatClick();
       }
     } catch (error: unknown) {
@@ -325,13 +316,13 @@ export function HomeTab({ onChatClick, onClose }: HomeTabProps) {
         </Accordion.Root>
       </div>
 
-      {/* Registration Modal for Chat with Us */}
+      {/* Registration Modal for Chat with Us - contained inside widget popup */}
       {showRegisterModal && (
-        <div className='fixed inset-0 z-50 flex items-start justify-center p-3 pt-3 sm:pt-4 overflow-y-auto bg-black/50 backdrop-blur-xs animate-fade-in'>
-          <div className='bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl border border-gray-100 relative animate-scale-in'>
+        <div className='absolute inset-0 z-30 flex flex-col bg-white p-5 overflow-y-auto animate-fade-in'>
+          <div className='w-full relative'>
             <button
               onClick={() => setShowRegisterModal(false)}
-              className='absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors'
+              className='absolute top-0 right-0 p-1 text-gray-400 hover:text-gray-600 transition-colors'
               aria-label='Close modal'
             >
               <X size={20} />
@@ -395,13 +386,42 @@ export function HomeTab({ onChatClick, onClose }: HomeTabProps) {
                 </div>
               </div>
 
+              <div>
+                <label className='block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5'>
+                  Student Grade
+                </label>
+                <div className='relative'>
+                  <GraduationCap className='w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2' />
+                  <select
+                    required
+                    className='w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#25B99A] focus:border-transparent outline-none transition-all bg-white text-gray-800'
+                    value={formData.student_grade}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        student_grade: e.target.value
+                      }))
+                    }
+                    disabled={isRegistering}
+                  >
+                    <option value=''>Select Student Grade...</option>
+                    {STUDENT_GRADES.map((grade) => (
+                      <option key={grade} value={grade}>
+                        {grade}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <button
                 type='submit'
                 className='w-full bg-gradient-to-r from-[#A8D63A] via-[#25B99A] to-[#326BEA] text-white py-3 rounded-lg font-semibold shadow hover:shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm mt-2'
                 disabled={
                   isRegistering ||
                   !formData.name.trim() ||
-                  formData.mobile.length !== 10
+                  formData.mobile.length !== 10 ||
+                  !formData.student_grade
                 }
               >
                 {isRegistering ? (

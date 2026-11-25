@@ -420,15 +420,18 @@ export function EnquiryTab() {
   if (view === 'list') {
     return (
       <div className='flex flex-col h-full p-4'>
-        <button
-          onClick={() => setView('new')}
-          className='w-full bg-black text-white rounded-lg py-4 mb-6 hover:opacity-90 transition-opacity'
-        >
-          <span className='flex items-center justify-center gap-2'>
-            <Plus size={20} />
-           Your Query
-          </span>
-        </button>
+        {/* Your Query section is hidden per user request (preserved for future use) */}
+        {false && (
+          <button
+            onClick={() => setView('new')}
+            className='w-full bg-black text-white rounded-lg py-4 mb-6 hover:opacity-90 transition-opacity'
+          >
+            <span className='flex items-center justify-center gap-2'>
+              <Plus size={20} />
+             Your Query
+            </span>
+          </button>
+        )}
 
         {isLoading ? (
           <div className='flex justify-center items-center flex-1'>

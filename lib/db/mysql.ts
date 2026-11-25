@@ -11,6 +11,7 @@ const poolConfig = {
   user: process.env.DB_USER || 'u546576758_chatbot_his',
   password: process.env.DB_PASSWORD || 'HisOmega@2026',
   database: process.env.DB_NAME || 'u546576758_chatbot_his',
+  charset: 'utf8mb4',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

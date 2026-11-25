@@ -14,7 +14,8 @@ export async function GET() {
         e.updated_at, 
         e.user_id,
         COALESCE(u.name, 'Unknown User') AS user_name,
-        COALESCE(u.mobile, '') AS user_mobile
+        COALESCE(u.mobile, '') AS user_mobile,
+        COALESCE(u.student_grade, '') AS user_student_grade
       FROM enquiries e
       LEFT JOIN users u ON e.user_id = u.id
       ORDER BY e.updated_at DESC;
@@ -41,7 +42,8 @@ export async function GET() {
           updated_at: enquiry.updated_at,
           users: {
             name: enquiry.user_name,
-            mobile: enquiry.user_mobile
+            mobile: enquiry.user_mobile,
+            student_grade: enquiry.user_student_grade || ''
           },
           messages: messages || []
         };

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/mysql';
 import { randomUUID } from 'crypto';
+import { ensureUserExists } from '@/lib/db/user-helper';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,12 +121,35 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { sessionId, content, botReply, currentFlow = 'start' } = await req.json();
+    const {
+      sessionId,
+      content,
+      botReply,
+      currentFlow = 'start',
+      userId
+    } = await req.json();
 
     if (!sessionId || !content) {
       return NextResponse.json(
         { error: 'sessionId and content are required' },
         { status: 400 }
+      );
+    }
+
+    // Ensure parent chat_histories row exists to satisfy foreign key fk_messages_chat
+    const existingChat = await query<any[]>(
+      'SELECT id, user_id FROM chat_histories WHERE id = ? LIMIT 1;',
+      [sessionId]
+    );
+
+    if (!existingChat || existingChat.length === 0) {
+      // Auto-heal: ensure valid user exists in MySQL
+      const targetUserId = await ensureUserExists(userId);
+      await query(
+        `INSERT INTO chat_histories (id, user_id, title, current_flow, created_at, updated_at)
+         VALUES (?, ?, 'New Chat', ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+         ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;`,
+        [sessionId, targetUserId, currentFlow]
       );
     }
 

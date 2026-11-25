@@ -6,7 +6,10 @@ interface LogoProps {
 
 export function Logo({ className }: LogoProps) {
   return (
-    <div className={cn('font-semibold text-xl text-rose-600', className)}>
+    <div
+      className={cn('font-semibold text-xl text-rose-600', className)}
+      suppressHydrationWarning
+    >
       HIS OMEGA
     </div>
   );

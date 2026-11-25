@@ -21,4 +21,5 @@ export interface UserDetails {
   id: string;
   name: string;
   mobile: string;
+  student_grade?: string;
 }

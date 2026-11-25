@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
     name VARCHAR(255) NOT NULL,
     mobile VARCHAR(20) NOT NULL UNIQUE,
+    student_grade VARCHAR(100) NULL,
     role ENUM('user', 'admin') DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -93,4 +94,27 @@ CREATE TABLE IF NOT EXISTS documents (
     content LONGTEXT,
     url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- App / Gemini Settings table
+CREATE TABLE IF NOT EXISTS app_settings (
+    `key` VARCHAR(100) PRIMARY KEY,
+    `value` LONGTEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Grade-Specific AI Agents table
+CREATE TABLE IF NOT EXISTS grade_agents (
+    id VARCHAR(36) PRIMARY KEY,
+    student_grade VARCHAR(100) NOT NULL UNIQUE,
+    agent_name VARCHAR(255) NOT NULL,
+    tone VARCHAR(100) NOT NULL DEFAULT 'Friendly & Encouraging',
+    custom_tone VARCHAR(255) NULL,
+    knowledge_text LONGTEXT NOT NULL,
+    custom_instructions TEXT NULL,
+    model VARCHAR(100) DEFAULT 'gemini-1.5-flash',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_grade_agents_grade (student_grade)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

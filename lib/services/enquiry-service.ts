@@ -52,13 +52,14 @@ export class EnquiryService {
   static async sendMessage(
     enquiryId: string,
     content: string,
-    sender_type: 'user' | 'admin'
+    sender_type: 'user' | 'admin',
+    userId?: string
   ): Promise<EnquiryMessage> {
     try {
       const res = await fetch(`/api/enquiries/${encodeURIComponent(enquiryId)}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, sender_type })
+        body: JSON.stringify({ content, sender_type, userId })
       });
 
       if (!res.ok) {

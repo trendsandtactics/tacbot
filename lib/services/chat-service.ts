@@ -12,12 +12,12 @@ export interface ChatFlow {
 }
 
 export class ChatService {
-  static async createUser(name: string, mobile: string) {
+  static async createUser(name: string, mobile: string, student_grade?: string) {
     try {
       const res = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, mobile })
+        body: JSON.stringify({ name, mobile, student_grade })
       });
 
       if (!res.ok) {
@@ -84,13 +84,14 @@ export class ChatService {
     sessionId: string,
     content: string,
     botReply?: string,
-    currentFlow: string = 'start'
+    currentFlow: string = 'start',
+    userId?: string
   ): Promise<{ userMessage: Message; aiMessage: Message; nextFlow: ChatFlow }> {
     try {
       const res = await fetch('/api/chat/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, content, botReply, currentFlow })
+        body: JSON.stringify({ sessionId, content, botReply, currentFlow, userId })
       });
 
       if (!res.ok) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db/mysql';
 import { randomUUID } from 'crypto';
+import { ensureUserExists } from '@/lib/db/user-helper';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,14 +57,17 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, subject, message } = await req.json();
+    const { userId, subject = 'Chat with AI Assistant', message } = await req.json();
 
-    if (!userId || !subject || !message) {
+    if (!message) {
       return NextResponse.json(
-        { error: 'userId, subject, and message are required' },
+        { error: 'message is required' },
         { status: 400 }
       );
     }
+
+    // Ensure valid user exists to satisfy foreign key fk_enquiries_user
+    const validUserId = await ensureUserExists(userId);
 
     const enquiryId = randomUUID();
     const messageId = randomUUID();
@@ -74,7 +78,7 @@ export async function POST(req: NextRequest) {
       INSERT INTO enquiries (id, user_id, subject, status, created_at, updated_at)
       VALUES (?, ?, ?, 'pending', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
       `,
-      [enquiryId, userId, subject.trim()]
+      [enquiryId, validUserId, (subject || 'Chat with AI Assistant').trim()]
     );
 
     // Insert initial message

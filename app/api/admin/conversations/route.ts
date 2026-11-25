@@ -7,6 +7,8 @@ interface ConversationRow {
   id: string;
   updated_at: string;
   user_name: string;
+  user_mobile?: string;
+  user_student_grade?: string;
   lastMessage: string;
   status: 'pending' | 'active' | 'resolved';
 }
@@ -19,6 +21,8 @@ export async function GET() {
           ch.id, 
           ch.updated_at, 
           COALESCE(u.name, 'Unknown User') AS user_name,
+          COALESCE(u.mobile, '') AS user_mobile,
+          COALESCE(u.student_grade, '') AS user_student_grade,
           (
             SELECT m.content 
             FROM messages m 
@@ -42,6 +46,8 @@ export async function GET() {
           e.id, 
           e.updated_at, 
           COALESCE(u.name, 'Unknown User') AS user_name,
+          COALESCE(u.mobile, '') AS user_mobile,
+          COALESCE(u.student_grade, '') AS user_student_grade,
           (
             SELECT em.content 
             FROM enquiry_messages em 
@@ -60,7 +66,9 @@ export async function GET() {
     const conversations = (rows || []).map((chat) => ({
       id: String(chat.id),
       users: {
-        name: chat.user_name || 'Unknown User'
+        name: chat.user_name || 'Unknown User',
+        mobile: chat.user_mobile || '',
+        student_grade: chat.user_student_grade || ''
       },
       lastMessage: chat.lastMessage || '',
       updated_at: chat.updated_at,

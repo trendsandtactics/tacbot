@@ -6,7 +6,8 @@ import type {
   EnquiryMessage,
   Announcement,
   CreateAnnouncementData,
-  Article
+  Article,
+  AdminContact
 } from '@/types/admin';
 
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
@@ -57,6 +58,34 @@ export class AdminService {
       return await apiFetch<Conversation[]>('/api/admin/conversations');
     } catch (error) {
       console.error('Error fetching conversations:', error);
+      throw error;
+    }
+  }
+
+  static async getContacts(grade?: string, search?: string): Promise<AdminContact[]> {
+    try {
+      const params = new URLSearchParams();
+      if (grade && grade !== 'all') params.set('grade', grade);
+      if (search && search.trim()) params.set('search', search.trim());
+      const queryStr = params.toString() ? `?${params.toString()}` : '';
+      return await apiFetch<AdminContact[]>(`/api/admin/contacts${queryStr}`);
+    } catch (error) {
+      console.error('Error fetching admin contacts:', error);
+      throw error;
+    }
+  }
+
+  static async updateContact(
+    id: string,
+    data: { student_grade?: string; name?: string; mobile?: string }
+  ): Promise<AdminContact> {
+    try {
+      return await apiFetch<AdminContact>('/api/admin/contacts', {
+        method: 'PATCH',
+        body: JSON.stringify({ id, ...data })
+      });
+    } catch (error) {
+      console.error('Error updating admin contact:', error);
       throw error;
     }
   }
