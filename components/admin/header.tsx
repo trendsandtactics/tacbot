@@ -1,18 +1,13 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { User, LogOut, ShieldCheck, ChevronRight } from 'lucide-react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { LogOut, ShieldCheck, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 
 export function AdminHeader() {
   const router = useRouter();
   const pathname = usePathname();
-  const supabase = createClientComponentClient({
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-    supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy'
-  });
 
   const getSectionTitle = () => {
     if (pathname === '/admin') return 'Dashboard';
@@ -28,9 +23,13 @@ export function AdminHeader() {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const res = await fetch('/api/auth/sign-out', { method: 'POST' });
+      if (!res.ok) {
+        throw new Error('Failed to sign out');
+      }
       toast.success('Signed out successfully');
       router.push('/sign-in');
+      router.refresh();
     } catch (error) {
       console.error('Error signing out:', error);
       toast.error('Failed to sign out');
