@@ -13,7 +13,7 @@ export async function PUT(
 
     const allowedFields = ['title', 'description', 'image_url', 'link', 'status'];
     const setClauses: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
 
     for (const field of allowedFields) {
       if (updates[field] !== undefined) {
@@ -39,10 +39,10 @@ export async function PUT(
     );
 
     return NextResponse.json({ success: true, message: 'Announcement updated' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating announcement in MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to update announcement' },
+      { error: error instanceof Error ? error.message : 'Failed to update announcement' },
       { status: 500 }
     );
   }
@@ -56,10 +56,10 @@ export async function DELETE(
     const { id } = await params;
     await query(`DELETE FROM announcements WHERE id = ?;`, [id]);
     return NextResponse.json({ success: true, message: 'Announcement deleted' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting announcement from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to delete announcement' },
+      { error: error instanceof Error ? error.message : 'Failed to delete announcement' },
       { status: 500 }
     );
   }

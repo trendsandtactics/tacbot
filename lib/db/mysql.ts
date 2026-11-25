@@ -27,8 +27,10 @@ if (process.env.NODE_ENV !== 'production') {
   global.mysqlPool = pool;
 }
 
-export async function query<T = any>(sql: string, params: any[] = []): Promise<T> {
-  const [results] = await pool.execute(sql, params);
+type SqlParam = string | number | boolean | null | Date | Buffer;
+
+export async function query<T = unknown>(sql: string, params: unknown[] = []): Promise<T> {
+  const [results] = await pool.execute(sql, params as SqlParam[]);
   return results as T;
 }
 
@@ -37,7 +39,7 @@ export async function testConnection(): Promise<{ success: boolean; message: str
     const connection = await pool.getConnection();
     try {
       const [rows] = await connection.query('SHOW TABLES;');
-      const tables = (rows as any[]).map((r) => Object.values(r)[0] as string);
+      const tables = (rows as Record<string, unknown>[]).map((r) => Object.values(r)[0] as string);
       return {
         success: true,
         message: 'Successfully connected to MySQL database',
@@ -46,10 +48,10 @@ export async function testConnection(): Promise<{ success: boolean; message: str
     } finally {
       connection.release();
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
-      message: error?.message || 'Database connection error'
+      message: error instanceof Error ? error.message : 'Database connection error'
     };
   }
 }

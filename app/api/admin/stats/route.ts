@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const rows = await query<any[]>(`
+    const rows = await query<Record<string, unknown>[]>(`
       SELECT 
         (SELECT COUNT(*) FROM users) AS totalUsers,
         (SELECT COUNT(*) FROM chat_histories) AS totalChats,
@@ -24,10 +24,10 @@ export async function GET() {
       todayChats: Number(stats.todayChats || 0),
       todayEnquiries: Number(stats.todayEnquiries || 0)
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching admin stats from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch dashboard stats' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch dashboard stats' },
       { status: 500 }
     );
   }

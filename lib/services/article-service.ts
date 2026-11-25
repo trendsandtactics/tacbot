@@ -5,8 +5,8 @@ export class ArticleService {
     try {
       const res = await fetch('/api/admin/articles');
       if (!res.ok) throw new Error('Failed to fetch articles');
-      const data = await res.json();
-      return (data || []).filter((a: any) => a.active);
+      const data: Article[] = await res.json();
+      return (data || []).filter((a) => a.active);
     } catch (error) {
       console.error('Error fetching articles:', error);
       return [];

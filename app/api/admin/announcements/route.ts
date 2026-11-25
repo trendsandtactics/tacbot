@@ -6,17 +6,17 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const announcements = await query<any[]>(`
+    const announcements = await query<Record<string, unknown>[]>(`
       SELECT id, title, description, image_url, link, status, created_at, updated_at
       FROM announcements
       ORDER BY created_at DESC;
     `);
 
     return NextResponse.json(announcements || []);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching announcements from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch announcements' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch announcements' },
       { status: 500 }
     );
   }
@@ -40,16 +40,16 @@ export async function POST(req: NextRequest) {
       [id, title, description, image_url, link, status]
     );
 
-    const rows = await query<any[]>(
+    const rows = await query<Record<string, unknown>[]>(
       `SELECT id, title, description, image_url, link, status, created_at, updated_at FROM announcements WHERE id = ?;`,
       [id]
     );
 
     return NextResponse.json(rows[0]);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating announcement in MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to create announcement' },
+      { error: error instanceof Error ? error.message : 'Failed to create announcement' },
       { status: 500 }
     );
   }

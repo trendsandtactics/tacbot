@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
 
-    const enquiries = await query<any[]>(
+    const enquiries = await query<Record<string, unknown>[]>(
       `
       SELECT id, user_id, subject, status, created_at, updated_at
       FROM enquiries
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     const listWithMessages = await Promise.all(
       (enquiries || []).map(async (enquiry) => {
-        const lastMsg = await query<any[]>(
+        const lastMsg = await query<Record<string, unknown>[]>(
           `
           SELECT id, enquiry_id, content, sender_type, created_at
           FROM enquiry_messages
@@ -46,10 +46,10 @@ export async function GET(req: NextRequest) {
     );
 
     return NextResponse.json(listWithMessages);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching user enquiries from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch enquiries' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch enquiries' },
       { status: 500 }
     );
   }
@@ -90,16 +90,16 @@ export async function POST(req: NextRequest) {
       [messageId, enquiryId, message.trim()]
     );
 
-    const created = await query<any[]>(
+    const created = await query<Record<string, unknown>[]>(
       `SELECT id, user_id, subject, status, created_at, updated_at FROM enquiries WHERE id = ?;`,
       [enquiryId]
     );
 
     return NextResponse.json(created[0]);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating enquiry in MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to create enquiry' },
+      { error: error instanceof Error ? error.message : 'Failed to create enquiry' },
       { status: 500 }
     );
   }

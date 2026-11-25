@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const recentChats = await query<any[]>(`
+    const recentChats = await query<Record<string, unknown>[]>(`
       SELECT 
         ch.id, 
         ch.created_at, 
@@ -16,7 +16,7 @@ export async function GET() {
       LIMIT 5;
     `);
 
-    const recentEnquiries = await query<any[]>(`
+    const recentEnquiries = await query<Record<string, unknown>[]>(`
       SELECT 
         e.id, 
         e.subject, 
@@ -47,10 +47,10 @@ export async function GET() {
         }
       }))
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching recent activity from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch recent activity' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch recent activity' },
       { status: 500 }
     );
   }

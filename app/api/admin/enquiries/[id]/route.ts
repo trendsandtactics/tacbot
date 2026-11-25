@@ -9,7 +9,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const enquiries = await query<any[]>(
+    const enquiries = await query<Record<string, unknown>[]>(
       `
       SELECT 
         e.id, 
@@ -33,7 +33,7 @@ export async function GET(
     }
 
     const enquiry = enquiries[0];
-    const messages = await query<any[]>(
+    const messages = await query<Record<string, unknown>[]>(
       `
       SELECT id, enquiry_id, content, sender_type, created_at
       FROM enquiry_messages
@@ -55,10 +55,10 @@ export async function GET(
       },
       messages: messages || []
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching enquiry by id from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch enquiry' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch enquiry' },
       { status: 500 }
     );
   }
@@ -82,10 +82,10 @@ export async function PATCH(
     );
 
     return NextResponse.json({ success: true, message: 'Status updated' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating enquiry status in MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to update status' },
+      { error: error instanceof Error ? error.message : 'Failed to update status' },
       { status: 500 }
     );
   }

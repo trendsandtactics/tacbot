@@ -13,7 +13,7 @@ export async function PUT(
 
     const allowedFields = ['title', 'description', 'content', 'image_url', 'youtube_url', 'active', 'tags'];
     const setClauses: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
 
     for (const field of allowedFields) {
       if (updates[field] !== undefined) {
@@ -45,10 +45,10 @@ export async function PUT(
     );
 
     return NextResponse.json({ success: true, message: 'Article updated' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating article in MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to update article' },
+      { error: error instanceof Error ? error.message : 'Failed to update article' },
       { status: 500 }
     );
   }
@@ -62,10 +62,10 @@ export async function DELETE(
     const { id } = await params;
     await query(`DELETE FROM articles WHERE id = ?;`, [id]);
     return NextResponse.json({ success: true, message: 'Article deleted' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting article from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to delete article' },
+      { error: error instanceof Error ? error.message : 'Failed to delete article' },
       { status: 500 }
     );
   }

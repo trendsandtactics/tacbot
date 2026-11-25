@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const enquiries = await query<any[]>(`
+    const enquiries = await query<Record<string, unknown>[]>(`
       SELECT 
         e.id, 
         e.subject, 
@@ -24,7 +24,7 @@ export async function GET() {
     // Fetch messages for each enquiry
     const enquiryList = await Promise.all(
       (enquiries || []).map(async (enquiry) => {
-        const messages = await query<any[]>(
+        const messages = await query<Record<string, unknown>[]>(
           `
           SELECT id, enquiry_id, content, sender_type, created_at
           FROM enquiry_messages
@@ -51,10 +51,10 @@ export async function GET() {
     );
 
     return NextResponse.json(enquiryList);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching admin enquiries from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch enquiries' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch enquiries' },
       { status: 500 }
     );
   }

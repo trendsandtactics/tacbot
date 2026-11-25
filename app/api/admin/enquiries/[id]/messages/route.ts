@@ -10,7 +10,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const messages = await query<any[]>(
+    const messages = await query<Record<string, unknown>[]>(
       `
       SELECT id, enquiry_id, content, sender_type, created_at
       FROM enquiry_messages
@@ -21,10 +21,10 @@ export async function GET(
     );
 
     return NextResponse.json(messages || []);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching enquiry messages from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch enquiry messages' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch enquiry messages' },
       { status: 500 }
     );
   }
@@ -69,10 +69,10 @@ export async function POST(
       sender_type: 'admin',
       created_at: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending enquiry message to MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to send message' },
+      { error: error instanceof Error ? error.message : 'Failed to send message' },
       { status: 500 }
     );
   }

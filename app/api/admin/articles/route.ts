@@ -6,7 +6,18 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const articles = await query<any[]>(`
+    const articles = await query<Array<{
+      id: string;
+      title: string;
+      description: string | null;
+      content: string;
+      image_url: string | null;
+      youtube_url: string | null;
+      active: number | boolean;
+      tags: string | string[] | null;
+      created_at: string;
+      updated_at: string;
+    }>>(`
       SELECT id, title, description, content, image_url, youtube_url, active, tags, created_at, updated_at
       FROM articles
       ORDER BY created_at DESC;
@@ -19,10 +30,10 @@ export async function GET() {
     }));
 
     return NextResponse.json(formatted);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching articles from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch articles' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch articles' },
       { status: 500 }
     );
   }
@@ -48,7 +59,18 @@ export async function POST(req: NextRequest) {
       [id, title, description, content, image_url, youtube_url, active, tags]
     );
 
-    const rows = await query<any[]>(
+    const rows = await query<Array<{
+      id: string;
+      title: string;
+      description: string | null;
+      content: string;
+      image_url: string | null;
+      youtube_url: string | null;
+      active: number | boolean;
+      tags: string | null;
+      created_at: string;
+      updated_at: string;
+    }>>(
       `SELECT id, title, description, content, image_url, youtube_url, active, tags, created_at, updated_at FROM articles WHERE id = ?;`,
       [id]
     );
@@ -59,10 +81,10 @@ export async function POST(req: NextRequest) {
       active: Boolean(art.active),
       tags: art.tags ? art.tags.split(',') : []
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating article in MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to create article' },
+      { error: error instanceof Error ? error.message : 'Failed to create article' },
       { status: 500 }
     );
   }

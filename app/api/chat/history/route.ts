@@ -14,7 +14,14 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 });
     }
 
-    const chats = await query<any[]>(
+    const chats = await query<Array<{
+      id: string;
+      user_id: string;
+      title: string | null;
+      current_flow: string | null;
+      created_at: string;
+      updated_at: string;
+    }>>(
       `
       SELECT id, user_id, title, current_flow, created_at, updated_at
       FROM chat_histories
@@ -26,7 +33,7 @@ export async function GET(req: NextRequest) {
 
     const historyWithMessages = await Promise.all(
       (chats || []).map(async (chat) => {
-        const msgs = await query<any[]>(
+        const msgs = await query<Array<{ content: string; created_at: string }>>(
           `
           SELECT content, created_at
           FROM messages
@@ -48,10 +55,10 @@ export async function GET(req: NextRequest) {
     );
 
     return NextResponse.json(historyWithMessages);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching chat history from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch chat history' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch chat history' },
       { status: 500 }
     );
   }
@@ -73,16 +80,16 @@ export async function POST(req: NextRequest) {
       [id, validUserId]
     );
 
-    const created = await query<any[]>(
+    const created = await query<Record<string, unknown>[]>(
       `SELECT id, user_id, title, current_flow, created_at, updated_at FROM chat_histories WHERE id = ?;`,
       [id]
     );
 
     return NextResponse.json(created[0]);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating chat in MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to create chat' },
+      { error: error instanceof Error ? error.message : 'Failed to create chat' },
       { status: 500 }
     );
   }
@@ -100,16 +107,16 @@ export async function PUT(req: NextRequest) {
       [title, chatId]
     );
 
-    const updated = await query<any[]>(
+    const updated = await query<Record<string, unknown>[]>(
       `SELECT id, user_id, title, current_flow, created_at, updated_at FROM chat_histories WHERE id = ?;`,
       [chatId]
     );
 
     return NextResponse.json(updated[0]);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating chat title in MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to update chat title' },
+      { error: error instanceof Error ? error.message : 'Failed to update chat title' },
       { status: 500 }
     );
   }

@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const docs = await query<any[]>(`
+    const docs = await query<Record<string, unknown>[]>(`
       SELECT id, title, content, url, created_at
       FROM documents
       ORDER BY created_at DESC;
@@ -24,10 +24,10 @@ export async function GET() {
     }));
 
     return NextResponse.json(formatted);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching documents from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch documents' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch documents' },
       { status: 500 }
     );
   }
@@ -50,10 +50,10 @@ export async function POST(req: NextRequest) {
     );
 
     return NextResponse.json({ id, title, content, url });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating document in MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to save document' },
+      { error: error instanceof Error ? error.message : 'Failed to save document' },
       { status: 500 }
     );
   }

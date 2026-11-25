@@ -11,10 +11,10 @@ export async function DELETE(
     const { id } = await params;
     await query(`DELETE FROM documents WHERE id = ?;`, [id]);
     return NextResponse.json({ success: true, message: 'Document deleted' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting document from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to delete document' },
+      { error: error instanceof Error ? error.message : 'Failed to delete document' },
       { status: 500 }
     );
   }

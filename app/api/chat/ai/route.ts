@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (persist && sessionId) {
       try {
         // Ensure chat_histories row exists to prevent fk_messages_chat constraint failure
-        const existingChat = await query<any[]>(
+        const existingChat = await query<Array<{ id: string }>>(
           'SELECT id FROM chat_histories WHERE id = ? LIMIT 1;',
           [sessionId]
         );

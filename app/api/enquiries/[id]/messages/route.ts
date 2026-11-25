@@ -11,7 +11,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const messages = await query<any[]>(
+    const messages = await query<Record<string, unknown>[]>(
       `
       SELECT id, enquiry_id, content, sender_type, created_at
       FROM enquiry_messages
@@ -22,10 +22,10 @@ export async function GET(
     );
 
     return NextResponse.json(messages || []);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching enquiry messages from MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch messages' },
+      { error: error instanceof Error ? error.message : 'Failed to fetch messages' },
       { status: 500 }
     );
   }
@@ -47,7 +47,7 @@ export async function POST(
     }
 
     // Ensure parent enquiries row exists to satisfy fk_enquiry_messages_enquiry
-    const existingEnquiry = await query<any[]>(
+    const existingEnquiry = await query<Array<{ id: string; user_id: string }>>(
       'SELECT id, user_id FROM enquiries WHERE id = ? LIMIT 1;',
       [id]
     );
@@ -83,16 +83,16 @@ export async function POST(
       [newStatus, id]
     );
 
-    const created = await query<any[]>(
+    const created = await query<Record<string, unknown>[]>(
       `SELECT id, enquiry_id, content, sender_type, created_at FROM enquiry_messages WHERE id = ?;`,
       [messageId]
     );
 
     return NextResponse.json(created[0]);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending enquiry message to MySQL:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to send message' },
+      { error: error instanceof Error ? error.message : 'Failed to send message' },
       { status: 500 }
     );
   }

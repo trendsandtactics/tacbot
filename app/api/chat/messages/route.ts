@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Ensure parent chat_histories row exists to satisfy foreign key fk_messages_chat
-    const existingChat = await query<any[]>(
+    const existingChat = await query<Array<{ id: string; user_id: string }>>(
       'SELECT id, user_id FROM chat_histories WHERE id = ? LIMIT 1;',
       [sessionId]
     );
